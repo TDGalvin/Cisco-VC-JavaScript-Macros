@@ -1,0 +1,29 @@
+/**
+ * Listen to the video system room reset event and do some
+ * more clean-up than the default
+ */
+
+import xapi from 'xapi';
+
+function resetRoomToDefault() {
+  xapi.Command.Audio.Volume.SetToDefault();
+  xapi.Command.RoomPreset.Activate({ PresetId: '1' });
+  xapi.Command.CallHistory.DeleteAll({ Filter: 'Received' });
+  xapi.Command.Selfview.Set({ Mode: 'On', OnMonitorRole: 'First', PIPPosition: 'UpperRight' });
+  xapi.Command.Video.Input.SetMainVideoSource({ ConnectorId: '1' });
+}
+
+xapi.Event.RoomReset.SecondsToReset.on((event) => {
+  if (event.SecondsToReset) {
+    xapi.Command.UserInterface.Message.TextLine.Display({
+      Text: `System will be reset to default settings in ${event.SecondsToReset} Seconds`,
+      Duration: 5,
+    });
+  }
+});
+
+xapi.Event.RoomReset.Reset.on((event) => {
+  if (event.SecondsToReset) {
+    resetRoomToDefault();
+  }
+});
